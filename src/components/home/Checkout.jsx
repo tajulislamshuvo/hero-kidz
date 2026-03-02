@@ -1,16 +1,21 @@
 "use client"
+import { createOrder } from '@/actions/server/order';
+import { useSession } from 'next-auth/react';
 import React, { useMemo, useState } from 'react';
+import Swal from 'sweetalert2';
 
 const Checkout = ({ cartItems }) => {
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    notes: "",
-  });
+  const session = useSession();
+  console.log(session)
+  // const [formData, setFormData] = useState({
+  //   fullName: "",
+  //   email: "",
+  //   phone: "",
+  //   address: "",
+  //   city: "",
+  //   notes: "",
+  // });
 
   const totalItems = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -22,30 +27,54 @@ const Checkout = ({ cartItems }) => {
     [cartItems]
   );
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // const handleChange = (e) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const payload = {
+      name: form.fullName.value,
+      email: form.email.value,
+      contact: form.phone.value,
+      address: form.address.value,
+      city: form.address.city,
+      instruction: form.notes.value,
+    };
+
+    const result = await createOrder(payload)
+    if (result.success) {
+      Swal.fire("success", "Order created", "success")
+    } else {
+      Swal.fire("error", "Something went wrong", "error")
+    }
+    console.log("Order Data:", { payload, cartItems });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Order Data:", { formData, cartItems });
-  };
+  if (session.status == "loading") {
+    return <h2>Loading....</h2>
+  }
+
   return (
     <div>
       <div className='flex flex-col-reverse md:flex-col  lg:flex-row gap-10 '>
-        <div className="flex-[2] shadow-2xl p-4 m-3">
+        <div className="flex-2 shadow-2xl p-4 m-5">
           <h2 className="text-2xl font-semibold mb-6">Billing Details</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            <div className='md:flex gap-2.5'>
+            <div className='md:flex gap-2.5 space-y-5 md:space-y-0'>
               <input
                 type="text"
                 name="fullName"
                 placeholder="Full Name"
-                value={formData.fullName}
-                onChange={handleChange}
+                value={session?.data?.user?.name}
+
                 required
+                readOnly
+
                 className="w-full border p-3 rounded-lg"
               />
 
@@ -53,8 +82,9 @@ const Checkout = ({ cartItems }) => {
                 type="email"
                 name="email"
                 placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
+                value={session?.data?.email}
+                // onChange={handleChange}
+                readOnly
                 required
                 className="w-full border p-3 rounded-lg"
               />
@@ -64,8 +94,8 @@ const Checkout = ({ cartItems }) => {
               type="text"
               name="phone"
               placeholder="Phone Number"
-              value={formData.phone}
-              onChange={handleChange}
+
+
               required
               className="w-full border p-3 rounded-lg"
             />
@@ -73,8 +103,8 @@ const Checkout = ({ cartItems }) => {
             <textarea
               name="address"
               placeholder="Full Address"
-              value={formData.address}
-              onChange={handleChange}
+
+
               required
               className="w-full border p-3 rounded-lg"
             />
@@ -83,8 +113,8 @@ const Checkout = ({ cartItems }) => {
               type="text"
               name="city"
               placeholder="City"
-              value={formData.city}
-              onChange={handleChange}
+
+
               required
               className="w-full border p-3 rounded-lg"
             />
@@ -92,8 +122,8 @@ const Checkout = ({ cartItems }) => {
             <textarea
               name="notes"
               placeholder="Order Notes (Optional)"
-              value={formData.notes}
-              onChange={handleChange}
+
+
               className="w-full border p-3 rounded-lg"
             />
 
@@ -101,11 +131,11 @@ const Checkout = ({ cartItems }) => {
               type="submit"
               className="w-full bg-primary text-white py-3 rounded-lg hover:opacity-90 transition"
             >
-              Place Order
+              Check out with cash on delivery
             </button>
           </form>
         </div>
-        <div className="flex-[1]">
+        <div className="flex-1">
           <div className="border rounded-xl p-5 shadow-md bg-white sticky top-20">
 
             <h2 className="text-xl font-semibold mb-4 border-b pb-2">

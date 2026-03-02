@@ -19,10 +19,10 @@ const Cart = ({ cartItem = [] }) => {
 
 
   return (
-    <div className="flex gap-8">
+    <div className="flex flex-col md:flex-row gap-8">
 
       {/* LEFT SIDE - Cart Items */}
-      <div className="flex-[3] space-y-3.5">
+      <div className="flex-3 space-y-3.5">
         {items.map((item) => (
           <CartItem
             key={item._id.toString()}
@@ -34,7 +34,7 @@ const Cart = ({ cartItem = [] }) => {
       </div>
 
       {/* RIGHT SIDE - Summary Card */}
-      <div className="flex-[1]">
+      <div className="flex-1">
         <div className="border rounded-xl p-5 shadow-md bg-white sticky top-20">
 
           <h2 className="text-xl font-semibold mb-4 border-b pb-2">

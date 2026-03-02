@@ -9,7 +9,7 @@ const CartPage = async () => {
   console.log(cartItem)
   return (
     <div>
-      {cartItem.length}
+
       <div className=''>
         <div className=''>
           <Cart cartItem={formatedCart}></Cart>
